@@ -12,7 +12,7 @@ The data-plane uses [Vertx](https://vertx.io/) and is composed of two components
 The receiver starts an HTTP server, and it accepts requests with a path of the form
 `/<broker-namespace>/<broker-name>/`.
 
-Once a request comes, it sends the event in the body to the topic `knative-messaging-kafka-broker.<broker-namespace>-<broker-name>`.
+Once a request comes, it sends the event in the body to the topic `knative-broker-<broker-namespace>-<broker-name>`.
 
 ## Dispatcher
 
