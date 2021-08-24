@@ -47,7 +47,7 @@ const (
 
 	SinkNotPresentErrFormat = "failed to describe topic %s: %v"
 
-	topicPrefix = "knative-sink-"
+	topicPrefix = "knative-messaging-kafka-sink-"
 )
 
 var (

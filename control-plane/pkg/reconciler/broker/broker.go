@@ -44,8 +44,8 @@ import (
 )
 
 const (
-	// TopicPrefix is the Kafka Broker topic prefix - (topic name: knative-broker-<broker-namespace>-<broker-name>).
-	TopicPrefix = "knative-broker-"
+	// TopicPrefix is the Kafka Broker topic prefix - (topic name: knative-messaging-kafka-broker.<broker-namespace>.<broker-name>).
+	TopicPrefix = "knative-messaging-kafka-broker."
 )
 
 type Configs struct {
