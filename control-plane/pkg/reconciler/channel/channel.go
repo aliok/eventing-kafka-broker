@@ -193,11 +193,13 @@ func (r *Reconciler) reconcileKind(ctx context.Context, channel *messagingv1beta
 	return statusConditionManager.Reconciled()
 }
 
+//nolint
 func (r *Reconciler) FinalizeKind(ctx context.Context, channel *messagingv1beta1.KafkaChannel) reconciler.Event {
 	// TODO: noop for now
 	return nil
 }
 
+//nolint
 func (r *Reconciler) topicConfig() (*kafka.TopicConfig, error) {
 	// TODO: all hardcoded for now
 	return &kafka.TopicConfig{
@@ -211,11 +213,13 @@ func (r *Reconciler) topicConfig() (*kafka.TopicConfig, error) {
 	}, nil
 }
 
+//nolint
 func (r *Reconciler) secret() (*corev1.Secret, error) {
 	// TODO: no secrets for now
 	return nil, nil
 }
 
+//nolint
 func (r *Reconciler) saramaSecurityOption() (func(config *sarama.Config) error, error) {
 	// TODO: no security for now
 	return func(config *sarama.Config) error {
