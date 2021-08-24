@@ -23,6 +23,7 @@ import (
 	"github.com/Shopify/sarama"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	messagingv1beta1 "knative.dev/eventing-kafka-broker/control-plane/pkg/apis/messaging/v1beta1"
 	"knative.dev/eventing-kafka-broker/control-plane/pkg/contract"
@@ -39,8 +40,8 @@ import (
 )
 
 const (
-	// TopicPrefix is the Kafka Channel topic prefix - (topic name: knative-messaging-kafka-<channel-namespace>-<channel-name>).
-	TopicPrefix = "knative-messaging-kafka-"
+	// TopicPrefix is the Kafka Channel topic prefix - (topic name: knative-messaging-kafka.<channel-namespace>.<channel-name>).
+	TopicPrefix = "knative-messaging-kafka"
 )
 
 type Configs struct {
@@ -109,7 +110,7 @@ func (r *Reconciler) reconcileKind(ctx context.Context, channel *messagingv1beta
 	}
 
 	// create the topic
-	topic, err := r.ClusterAdmin.CreateTopic(logger, kafka.Topic(TopicPrefix, channel), topicConfig, saramaSecurityOption)
+	topic, err := r.ClusterAdmin.CreateTopic(logger, topic(TopicPrefix, channel), topicConfig, saramaSecurityOption)
 	if err != nil {
 		return statusConditionManager.FailedToCreateTopic(topic, err)
 	}
@@ -257,4 +258,10 @@ func (r *Reconciler) getChannelContractResource(ctx context.Context, topic strin
 	resource.EgressConfig = egressConfig
 
 	return resource, nil
+}
+
+// Topic returns a topic name given a topic prefix and a generic object.
+// This function uses a different format than the kafkatopic.Topic function
+func topic(prefix string, obj metav1.Object) string {
+	return fmt.Sprintf("%s.%s.%s", prefix, obj.GetNamespace(), obj.GetName())
 }
