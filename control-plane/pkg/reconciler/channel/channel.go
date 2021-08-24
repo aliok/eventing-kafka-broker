@@ -39,8 +39,8 @@ import (
 )
 
 const (
-	// TopicPrefix is the Kafka Channel topic prefix - (topic name: knative-channel-<channel-namespace>-<channel-name>).
-	TopicPrefix = "knative-channel-"
+	// TopicPrefix is the Kafka Channel topic prefix - (topic name: knative-messaging-kafka-<channel-namespace>-<channel-name>).
+	TopicPrefix = "knative-messaging-kafka-"
 )
 
 type Configs struct {
