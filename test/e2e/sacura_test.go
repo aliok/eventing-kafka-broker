@@ -42,7 +42,7 @@ const (
 	namespace                      = "sacura"
 	sacuraVerifyCommittedOffsetJob = "verify-committed-offset"
 	sacuraTriggerName              = "trigger"
-	sacuraTopic                    = "knative-broker-sacura-sacura"
+	sacuraTopic                    = "knative-messaging-kafka-sacura-sacura"
 
 	pollTimeout  = 30 * time.Minute
 	pollInterval = 10 * time.Second

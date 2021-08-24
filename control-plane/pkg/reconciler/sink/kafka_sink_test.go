@@ -60,7 +60,7 @@ const (
 	ExpectedTopicIsPresent         = "expectedTopicIsPresent"
 	ExpectedErrorOnDescribeTopics  = "expectedErrorOnDescribeTopics"
 
-	TopicPrefix = "knative-sink-"
+	TopicPrefix = "knative-messaging-kafka-sink."
 )
 
 var (
@@ -1029,7 +1029,7 @@ func useTable(t *testing.T, table TableTest, configs *broker.Configs) {
 
 	table.Test(t, NewFactory(configs, func(ctx context.Context, listers *Listers, configs *broker.Configs, row *TableRow) controller.Reconciler {
 
-		expectedTopicName := fmt.Sprintf("%s%s-%s", TopicPrefix, SinkNamespace, SinkName)
+		expectedTopicName := fmt.Sprintf("%s%s.%s", TopicPrefix, SinkNamespace, SinkName)
 		if want, ok := row.OtherTestData[wantTopicName]; ok {
 			expectedTopicName = want.(string)
 		}
