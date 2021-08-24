@@ -59,7 +59,7 @@ func BootstrapServersArray(bootstrapServers string) []string {
 
 // Topic returns a topic name given a topic prefix and a generic object.
 func Topic(prefix string, obj metav1.Object) string {
-	return fmt.Sprintf("%s%s.%s", prefix, obj.GetNamespace(), obj.GetName())
+	return fmt.Sprintf("%s%s-%s", prefix, obj.GetNamespace(), obj.GetName())
 }
 
 // CreateTopic creates a topic with name 'topic' following the TopicConfig configuration passed as parameter.
