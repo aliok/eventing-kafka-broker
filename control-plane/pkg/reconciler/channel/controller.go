@@ -51,7 +51,7 @@ func NewController(ctx context.Context, watcher configmap.Watcher, configs *Conf
 
 	impl := kafkachannelreconciler.NewImpl(ctx, reconciler)
 
-	reconciler.Resolver = resolver.NewURIResolver(ctx, impl.EnqueueKey)
+	reconciler.Resolver = resolver.NewURIResolverFromTracker(ctx, impl.Tracker)
 
 	return impl
 }
