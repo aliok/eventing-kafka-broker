@@ -94,6 +94,9 @@ func (r *Reconciler) reconcileKind(ctx context.Context, channel *messagingv1beta
 
 	// get the secret to access Kafka
 	secret, err := r.secret()
+	if err != nil {
+		return fmt.Errorf("failed to get secret: %w", err)
+	}
 	if secret != nil {
 		logger.Debug("Secret reference",
 			zap.String("apiVersion", secret.APIVersion),
