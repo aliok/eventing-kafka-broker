@@ -62,6 +62,7 @@ func validateBrokerFromUnstructured(ctx context.Context, unstructured *unstructu
 	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructured.UnstructuredContent(), &broker); err != nil {
 		return err
 	}
+	// TODO: look for usages of kafka.BrokerClass
 	if class, ok := broker.Annotations[eventing.BrokerClassAnnotationKey]; !ok || class != kafka.BrokerClass {
 		return nil
 	}
