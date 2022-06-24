@@ -86,7 +86,7 @@ func NewController(ctx context.Context, configs *config.Env) *controller.Impl {
 	impl := kafkachannelreconciler.NewImpl(ctx, reconciler)
 	IPsLister := prober.IdentityIPsLister()
 	reconciler.Prober = prober.NewAsync(ctx, http.DefaultClient, "", IPsLister, impl.EnqueueKey)
-	reconciler.IngressHost = network.GetServiceHostname(configs.IngressName, configs.SystemNamespace)
+	reconciler.IngressHost = network.GetServiceHostname(reconciler.IngressName, reconciler.DataPlaneNamespace)
 
 	channelInformer := kafkachannelinformer.Get(ctx)
 
