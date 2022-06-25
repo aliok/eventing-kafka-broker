@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package brokeryolo
+package broker
 
 import (
 	"context"
@@ -50,7 +50,7 @@ import (
 
 const DataPlaneManifestDirectoryPath = "/dataplane/config/broker"
 
-func NewController(ctx context.Context, watcher configmap.Watcher, env *config.Env) *controller.Impl {
+func NewNamespacedController(ctx context.Context, watcher configmap.Watcher, env *config.Env) *controller.Impl {
 	logger := logging.FromContext(ctx)
 
 	eventing.RegisterAlternateBrokerConditionSet(base.IngressConditionSet)
@@ -68,7 +68,7 @@ func NewController(ctx context.Context, watcher configmap.Watcher, env *config.E
 		logger.Fatal("unable to load base dataplane manifest", zap.Error(err))
 	}
 
-	reconciler := &Reconciler{
+	reconciler := &NamespacedReconciler{
 		Reconciler: &base.Reconciler{
 			KubeClient:                  kubeclient.Get(ctx),
 			PodLister:                   podinformer.Get(ctx).Lister(),

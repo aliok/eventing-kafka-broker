@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package brokeryolo
+package broker
 
 import (
 	"context"
@@ -35,9 +35,7 @@ import (
 	"knative.dev/eventing-kafka-broker/control-plane/pkg/kafka"
 	"knative.dev/eventing-kafka-broker/control-plane/pkg/prober"
 	"knative.dev/eventing-kafka-broker/control-plane/pkg/reconciler/base"
-	brokerreconciler "knative.dev/eventing-kafka-broker/control-plane/pkg/reconciler/broker"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
-	"knative.dev/pkg/logging"
 	"knative.dev/pkg/reconciler"
 	"knative.dev/pkg/resolver"
 )
@@ -64,7 +62,7 @@ import (
 // TODO: IPListerWithMapping struct can leak resources in case of a leader change
 // TODO: We might need to create a TTL mechanism
 
-type Reconciler struct {
+type NamespacedReconciler struct {
 	*base.Reconciler
 	*config.Env
 
@@ -86,14 +84,13 @@ type Reconciler struct {
 	IPsLister prober.IPListerWithMapping
 }
 
-func (r *Reconciler) ReconcileKind(ctx context.Context, broker *eventing.Broker) reconciler.Event {
-	logging.FromContext(ctx).Infof("YOLO ReconcileKind (wrapper)")
+func (r *NamespacedReconciler) ReconcileKind(ctx context.Context, broker *eventing.Broker) reconciler.Event {
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		return r.reconcileKind(ctx, broker)
 	})
 }
 
-func (r *Reconciler) reconcileKind(ctx context.Context, broker *eventing.Broker) reconciler.Event {
+func (r *NamespacedReconciler) reconcileKind(ctx context.Context, broker *eventing.Broker) reconciler.Event {
 	r.IPsLister.Register(
 		types.NamespacedName{Namespace: broker.Namespace, Name: broker.Name},
 		prober.GetIPForService(types.NamespacedName{Namespace: broker.Namespace, Name: r.Env.IngressName}),
@@ -101,7 +98,7 @@ func (r *Reconciler) reconcileKind(ctx context.Context, broker *eventing.Broker)
 
 	br := r.createReconcilerForBrokerInstance(broker)
 
-	err := r.ReconcileDataPlaneConfigMap(ctx, broker)
+	err := r.reconcileDataPlaneConfigMap(ctx, broker)
 	if err != nil {
 		return fmt.Errorf("failed to create/update data plane config map: %s, error: %v", fmt.Sprintf("%s/%s", broker.Namespace, r.Env.DataPlaneConfigMapName), err)
 	}
@@ -118,16 +115,13 @@ func (r *Reconciler) reconcileKind(ctx context.Context, broker *eventing.Broker)
 	return br.DoReconcileKind(ctx, broker)
 }
 
-func (r *Reconciler) FinalizeKind(ctx context.Context, broker *eventing.Broker) reconciler.Event {
-	logging.FromContext(ctx).Infof("YOLO FinalizeKind (wrapper)")
+func (r *NamespacedReconciler) FinalizeKind(ctx context.Context, broker *eventing.Broker) reconciler.Event {
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		return r.finalizeKind(ctx, broker)
 	})
 }
 
-func (r *Reconciler) finalizeKind(ctx context.Context, broker *eventing.Broker) reconciler.Event {
-	logging.FromContext(ctx).Infof("YOLO finalizeKind")
-
+func (r *NamespacedReconciler) finalizeKind(ctx context.Context, broker *eventing.Broker) reconciler.Event {
 	br := r.createReconcilerForBrokerInstance(broker)
 	result := br.DoFinalizeKind(ctx, broker)
 
@@ -136,9 +130,9 @@ func (r *Reconciler) finalizeKind(ctx context.Context, broker *eventing.Broker) 
 	return result
 }
 
-func (r *Reconciler) createReconcilerForBrokerInstance(broker *eventing.Broker) *brokerreconciler.Reconciler {
+func (r *NamespacedReconciler) createReconcilerForBrokerInstance(broker *eventing.Broker) *Reconciler {
 
-	return &brokerreconciler.Reconciler{
+	return &Reconciler{
 		Reconciler: &base.Reconciler{
 			KubeClient:             r.Reconciler.KubeClient,
 			PodLister:              r.Reconciler.PodLister,
@@ -164,7 +158,7 @@ func (r *Reconciler) createReconcilerForBrokerInstance(broker *eventing.Broker) 
 
 // getManifest returns the manifest that is transformed from the BaseDataPlaneManifest with the changes
 // for the given broker
-func (r *Reconciler) getManifest(broker *eventing.Broker) (mf.Manifest, error) {
+func (r *NamespacedReconciler) getManifest(broker *eventing.Broker) (mf.Manifest, error) {
 	manifest := r.BaseDataPlaneManifest
 
 	manifest, err := manifest.Transform(mf.InjectNamespace(broker.Namespace))
@@ -253,7 +247,7 @@ func setImagesForDeployments(imageMap map[string]string) mf.Transformer {
 	}
 }
 
-func (r *Reconciler) ReconcileDataPlaneConfigMap(ctx context.Context, broker *eventing.Broker) error {
+func (r *NamespacedReconciler) reconcileDataPlaneConfigMap(ctx context.Context, broker *eventing.Broker) error {
 	cm, err := r.KubeClient.CoreV1().
 		ConfigMaps(broker.Namespace).
 		Get(ctx, r.Env.DataPlaneConfigMapName, metav1.GetOptions{})
