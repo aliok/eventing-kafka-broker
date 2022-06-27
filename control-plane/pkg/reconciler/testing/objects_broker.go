@@ -53,12 +53,12 @@ const (
 )
 
 func BrokerTopic() string {
-	broker := NewBroker().(metav1.Object)
+	broker := NewBroker()
 	return kafka.BrokerTopic(TopicPrefix, broker)
 }
 
 // NewBroker creates a new Broker with broker class equals to kafka.BrokerClass.
-func NewBroker(options ...reconcilertesting.BrokerOption) runtime.Object {
+func NewBroker(options ...reconcilertesting.BrokerOption) *eventing.Broker {
 	return reconcilertesting.NewBroker(
 		BrokerName,
 		BrokerNamespace,
@@ -77,7 +77,16 @@ func NewBroker(options ...reconcilertesting.BrokerOption) runtime.Object {
 	)
 }
 
-func NewDeletedBroker(options ...reconcilertesting.BrokerOption) runtime.Object {
+func NewNamespacedBroker(options ...reconcilertesting.BrokerOption) *eventing.Broker {
+	return NewBroker(
+		append(
+			options,
+			reconcilertesting.WithBrokerClass(kafka.BrokerClassYolo),
+		)...,
+	)
+}
+
+func NewDeletedBroker(options ...reconcilertesting.BrokerOption) *eventing.Broker {
 	return NewBroker(
 		append(
 			options,
@@ -85,6 +94,15 @@ func NewDeletedBroker(options ...reconcilertesting.BrokerOption) runtime.Object 
 				WithDeletedTimeStamp(broker)
 			},
 			BrokerConfigMapAnnotations(),
+		)...,
+	)
+}
+
+func NewDeletedNamespacedBroker(options ...reconcilertesting.BrokerOption) runtime.Object {
+	return NewDeletedBroker(
+		append(
+			options,
+			reconcilertesting.WithBrokerClass(kafka.BrokerClassYolo),
 		)...,
 	)
 }

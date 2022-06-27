@@ -133,6 +133,18 @@ func NewConfigMapWithBinaryData(env *config.Env, data []byte, options ...reconci
 	)
 }
 
+func WithConfigMapNamespace(namespace string) reconcilertesting.ConfigMapOption {
+	return func(cm *corev1.ConfigMap) {
+		cm.Namespace = namespace
+	}
+}
+
+func WithConfigMapOwnerRef(ownerref *metav1.OwnerReference) reconcilertesting.ConfigMapOption {
+	return func(cm *corev1.ConfigMap) {
+		cm.ObjectMeta.OwnerReferences = []metav1.OwnerReference{*ownerref}
+	}
+}
+
 func NewConfigMapWithTextData(namespace, name string, data map[string]string) runtime.Object {
 	return reconcilertesting.NewConfigMap(
 		name,
