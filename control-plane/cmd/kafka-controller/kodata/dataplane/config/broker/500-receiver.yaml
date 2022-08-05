@@ -66,6 +66,12 @@ spec:
               readOnly: true
             - mountPath: /tmp
               name: cache
+            - mountPath: /etc/logging
+              name: kafka-broker-config-logging
+              readOnly: true
+            - mountPath: /etc/tracing
+              name: config-tracing
+              readOnly: true
           ports:
             - containerPort: 9090
               name: http-metrics
@@ -146,6 +152,12 @@ spec:
             name: config-kafka-broker-data-plane
         - name: cache
           emptyDir: { }
+        - name: kafka-broker-config-logging
+          configMap:
+            name: kafka-config-logging
+        - name: config-tracing
+          configMap:
+            name: config-tracing
       restartPolicy: Always
 ---
 
