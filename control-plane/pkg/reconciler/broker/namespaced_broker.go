@@ -193,7 +193,7 @@ func (r *NamespacedReconciler) getManifest(ctx context.Context, broker *eventing
 		return mf.Manifest{}, fmt.Errorf("unable to load dataplane manifest: %w", err)
 	}
 
-	manifest, err = manifest.Transform(mf.InjectNamespace(broker.Namespace))
+	manifest, err = manifest.Transform(injectNamespace(broker.Namespace))
 	if err != nil {
 		return mf.Manifest{}, fmt.Errorf("unable to transform base dataplane manifest with namespace injection. namespace: %s, error: %v", broker.Namespace, err)
 	}
@@ -224,6 +224,30 @@ func (r *NamespacedReconciler) getManifest(ctx context.Context, broker *eventing
 	}
 
 	return manifest, nil
+}
+
+func injectNamespace(namespace string) mf.Transformer {
+	return func(u *unstructured.Unstructured) error {
+		kind := strings.ToLower(u.GetKind())
+		noInjectNsToSubject := strings.ToLower(u.GetAnnotations()["knative-no-inject-subject-namespace"]) == "true"
+
+		// for anything other than rolebinding and clusterrolebinding, just use the default injection.
+		// if the clusterrolebinding or rolebinding is marked with the annotation to not inject the namespace, then we
+		// do not inject the namespace to the subject of those bindings
+		//
+		// however, we still need to set the namespace of the rolebinding itself
+
+		if kind == "clusterrolebinding" && noInjectNsToSubject {
+			return nil
+		}
+
+		if kind == "rolebinding" && noInjectNsToSubject {
+			u.SetNamespace(namespace)
+			return nil
+		}
+
+		return mf.InjectNamespace(namespace)(u)
+	}
 }
 
 func (r *NamespacedReconciler) deploymentsFromSystemNamespace(broker *eventing.Broker) ([]unstructured.Unstructured, error) {
